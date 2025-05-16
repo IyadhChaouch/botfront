@@ -1,103 +1,166 @@
-import Image from "next/image";
+'use client';
 
-export default function Home() {
+import { useEffect, useRef, useState } from 'react';
+import { StarIcon } from '@heroicons/react/24/solid';
+
+type LLMResponse = {
+  id: number;
+  model: string;
+  content: string;
+  rating?: number;
+};
+
+type Message = {
+  id: number;
+  question: string;
+  responses: LLMResponse[];
+};
+
+export default function HomePage() {
+  const [chatHistory, setChatHistory] = useState<Message[]>([]);
+  const [input, setInput] = useState('');
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+// pages/index.tsx (or wherever your HomePage lives)
+
+// pages/index.tsx (inside HomePage)
+
+const fetchLLMResponses = async (question: string): Promise<LLMResponse[]> => {
+  const llmEndpoints = [
+
+    { model: 'LLaMA 3',   url: 'http://127.0.0.1:5000/api/llama3',    payloadKey: 'input' },
+  
+  ];
+
+  const responses = await Promise.all(
+    llmEndpoints.map(async ({ model, url, payloadKey }, idx) => {
+      try {
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ [payloadKey]: question }),
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const { response } = await res.json();
+
+        return {
+          id: Date.now() + idx + 1,
+          model,
+          content: response ?? `Empty response from ${model}`,
+        };
+      } catch (err) {
+        return {
+          id: Date.now() + idx + 1,
+          model,
+          content: `⚠️ Failed to fetch from ${model}: ${err}`,
+        };
+      }
+    })
+  );
+
+  return responses;
+};
+
+
+  const sendMessage = async () => {
+    if (!input.trim()) return;
+
+    const userQuestion = input.trim();
+    setInput('');
+
+    const newMessage: Message = {
+      id: Date.now(),
+      question: userQuestion,
+      responses: [],
+    };
+
+    setChatHistory((prev) => [...prev, newMessage]);
+
+    const responses = await fetchLLMResponses(userQuestion);
+
+    setChatHistory((prev) =>
+      prev.map((msg) =>
+        msg.id === newMessage.id
+          ? { ...msg, responses }
+          : msg
+      )
+    );
+  };
+
+  const rateResponse = (messageId: number, responseId: number, rating: number) => {
+    setChatHistory((prev) =>
+      prev.map((msg) =>
+        msg.id === messageId
+          ? {
+              ...msg,
+              responses: msg.responses.map((res) =>
+                res.id === responseId ? { ...res, rating } : res
+              ),
+            }
+          : msg
+      )
+    );
+  };
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [chatHistory]);
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <main className="flex flex-col h-screen max-w-5xl mx-auto p-6">
+      <h1 className="text-3xl font-bold mb-6 text-center">ADDINN customer chatbot</h1>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+      <div className="flex-1 overflow-y-auto space-y-8">
+        {chatHistory.map((msg) => (
+          <div key={msg.id} className="space-y-3">
+            <div className="text-lg font-semibold bg-blue-50 p-3 rounded-md shadow-sm">
+              🧑‍💻 You asked: <span className="italic">{msg.question}</span>
+            </div>
+
+            <div className="grid sm:grid-cols-1 md:grid-cols-2 gap-4">
+              {msg.responses.map((res) => (
+                <div key={res.id} className="bg-white border p-4 rounded-md shadow-sm">
+                  <div className="flex justify-between mb-2">
+                    <span className="text-sm font-medium text-gray-600">{res.model}</span>
+                    <div className="flex space-x-1">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <StarIcon
+                          key={star}
+                          className={`h-5 w-5 cursor-pointer transition ${
+                            res.rating && res.rating >= star
+                              ? 'text-yellow-400'
+                              : 'text-gray-300'
+                          }`}
+                          onClick={() => rateResponse(msg.id, res.id, star)}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                  <p className="text-gray-800 whitespace-pre-wrap">{res.content}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+        <div ref={messagesEndRef} />
+      </div>
+
+      <div className="mt-6 flex gap-2">
+        <input
+          type="text"
+          className="flex-1 border rounded px-4 py-2 shadow-sm"
+          placeholder="Ask something..."
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
+        />
+        <button
+          onClick={sendMessage}
+          className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition"
         >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+          Send
+        </button>
+      </div>
+    </main>
   );
 }

@@ -1,26 +1,317 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Brand (teal/turquoise-green primary) */
+  --color-brand:        #00857A; /* primary actions, section headers (R25.2) */
+  --color-brand-dark:   #006259; /* hover/active for brand surfaces */
+  --color-brand-light:  #4FB3A9; /* subtle brand fills, brand on dark */
+
+  /* Accent */
+  --color-accent:       #F5A623; /* highlighted CTAs (R25.3) */
+
+  /* Neutrals / surfaces (R25.6) */
+  --color-bg:           #F7F9F9; /* page background */
+  --color-surface:      #FFFFFF; /* card surface */
+  --color-border:       #E2E8E7; /* hairlines, dividers */
+  --color-text:         #1A2B29; /* primary text */
+  --color-text-muted:   #5C6B69; /* secondary text */
+
+  /* Semantic_Color tokens (R25.4, R25.5) */
+  --color-success:      #2E7D5B; /* success result-card state */
+  --color-warning:      #F5A623; /* pending / warning state */
+  --color-error:        #C0392B; /* error result-card + R7 error states */
+  --color-star-filled:  #F5A623; /* filled rating star */
+  --color-star-empty:   #CBD5D3; /* empty rating star */
+
+  /* Compatibility aliases for the body rule (map to palette) */
+  --background: var(--color-bg);
+  --foreground: var(--color-text);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
+/*
+ * Dark Color_Mode override (R25.9, R25.10, R25.11).
+ * Reassigns the SAME token names to dark values so every component
+ * re-themes automatically. Each token keeps its semantic role
+ * (brand stays brand, bg stays bg, …) — no role collapses.
+ * The light :root values above remain the unconditional default
+ * when no preference resolves (R25.10).
+ */
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    /* Neutrals / surfaces (R25.6, R25.9) */
+    --color-bg:           #0E1716; /* page background (documented dark value) */
+    --color-surface:      #16221F; /* card surface (documented dark value) */
+    --color-border:       #24302D; /* visible hairline on dark surfaces */
+    --color-text:         #E6EDEB; /* primary text (documented dark value) */
+    --color-text-muted:   #9DB0AD; /* secondary text, AA-contrast on dark */
+
+    /* Brand (R25.2) */
+    --color-brand:        #4FB3A9; /* primary brand, lifted for dark (documented) */
+    --color-brand-dark:   #006259; /* hover/active for brand surfaces */
+    --color-brand-light:  #7FCFC6; /* subtle brand fills on dark */
+
+    /* Accent (R25.3) */
+    --color-accent:       #F5A623; /* accent role preserved */
+
+    /* Semantic_Color tokens (R25.4, R25.5) */
+    --color-success:      #4FB37E; /* success role, lifted for dark contrast */
+    --color-warning:      #F5A623; /* pending / warning role */
+    --color-error:        #E0625A; /* error role, lifted for dark contrast */
+    --color-star-filled:  #F5A623; /* filled rating star */
+    --color-star-empty:   #3A4744; /* empty rating star on dark */
+
+    /* Compatibility aliases re-resolve to the dark tokens */
+    --background: var(--color-bg);
+    --foreground: var(--color-text);
   }
 }
 
+/* Explicit data-theme attribute wins regardless of OS preference (R25.11). */
+:root[data-theme="dark"] {
+  /* Neutrals / surfaces (R25.6, R25.9) */
+  --color-bg:           #0E1716;
+  --color-surface:      #16221F;
+  --color-border:       #24302D;
+  --color-text:         #E6EDEB;
+  --color-text-muted:   #9DB0AD;
+
+  /* Brand (R25.2) */
+  --color-brand:        #4FB3A9;
+  --color-brand-dark:   #006259;
+  --color-brand-light:  #7FCFC6;
+
+  /* Accent (R25.3) */
+  --color-accent:       #F5A623;
+
+  /* Semantic_Color tokens (R25.4, R25.5) */
+  --color-success:      #4FB37E;
+  --color-warning:      #F5A623;
+  --color-error:        #E0625A;
+  --color-star-filled:  #F5A623;
+  --color-star-empty:   #3A4744;
+
+  /* Compatibility aliases re-resolve to the dark tokens */
+  --background: var(--color-bg);
+  --foreground: var(--color-text);
+}
+
+/*
+ * Explicit light Color_Mode. Mirrors the default :root (light) values so that
+ * choosing "Clair" wins over an OS `prefers-color-scheme: dark` preference
+ * (the attribute selector outranks the media-query :root rule). Kept in sync
+ * with the light :root block above.
+ */
+:root[data-theme="light"] {
+  --color-bg:           #F7F9F9;
+  --color-surface:      #FFFFFF;
+  --color-border:       #E2E8E7;
+  --color-text:         #1A2B29;
+  --color-text-muted:   #5C6B69;
+
+  --color-brand:        #00857A;
+  --color-brand-dark:   #006259;
+  --color-brand-light:  #4FB3A9;
+
+  --color-accent:       #F5A623;
+
+  --color-success:      #2E7D5B;
+  --color-warning:      #F5A623;
+  --color-error:        #C0392B;
+  --color-star-filled:  #F5A623;
+  --color-star-empty:   #CBD5D3;
+
+  --background: var(--color-bg);
+  --foreground: var(--color-text);
+}
+
+@theme inline {
+  /* Expose every Theme_Token to Tailwind v4 utilities */
+  --color-brand:        var(--color-brand);
+  --color-brand-dark:   var(--color-brand-dark);
+  --color-brand-light:  var(--color-brand-light);
+  --color-accent:       var(--color-accent);
+  --color-bg:           var(--color-bg);
+  --color-surface:      var(--color-surface);
+  --color-border:       var(--color-border);
+  --color-text:         var(--color-text);
+  --color-text-muted:   var(--color-text-muted);
+  --color-success:      var(--color-success);
+  --color-warning:      var(--color-warning);
+  --color-error:        var(--color-error);
+  --color-star-filled:  var(--color-star-filled);
+  --color-star-empty:   var(--color-star-empty);
+
+  /* Existing background/foreground + font tokens preserved */
+  --color-background:   var(--background);
+  --color-foreground:   var(--foreground);
+  --font-sans:          var(--font-plex-sans);
+  --font-mono:          var(--font-plex-sans);
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-bg);
+  color: var(--color-text);
+  /* IBM Plex Sans drives Latin; the Arabic Plex face covers Arabic glyphs when
+     the locale toggle flips the document to RTL. */
+  font-family: var(--font-plex-sans), var(--font-plex-arabic), system-ui, sans-serif;
+  font-size: var(--app-font-size, 16px);
+}
+
+/* Reading-comfort: when the user opts to reduce animations (Préférences tab),
+   suppress the redesign motion utilities and transitions globally. */
+:root.reduce-motion *,
+:root.reduce-motion *::before,
+:root.reduce-motion *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+}
+
+/* ---------------------------------------------------------------------------
+ * Presentational polish for the modern chat-app redesign.
+ * These rules add motion + small utilities ONLY; they never touch the
+ * --color-* Theme_Token declarations above (contrast/dark-parity tests parse
+ * those blocks and require them to stay intact).
+ * ------------------------------------------------------------------------- */
+
+@keyframes message-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes typing-bounce {
+  0%,
+  80%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.4;
+  }
+  40% {
+    transform: translateY(-3px);
+    opacity: 1;
+  }
+}
+
+/* Smooth, subtle enter animation applied to chat turns + result cards. */
+.animate-message-in {
+  animation: message-in 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Three-dot typing rhythm for the pending indicator dots. */
+.animate-typing-dot {
+  animation: typing-bounce 1.2s ease-in-out infinite;
+}
+
+/* Thin, themeable scrollbar for the conversation column. */
+.scroll-soft {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
+}
+.scroll-soft::-webkit-scrollbar {
+  width: 8px;
+}
+.scroll-soft::-webkit-scrollbar-thumb {
+  background-color: var(--color-border);
+  border-radius: 9999px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-message-in,
+  .animate-typing-dot {
+    animation: none;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * Voice mode — organic morphing "orb" glyph + sound rings + waveform.
+ * Presentational motion only; the global `.reduce-motion` rule above and the
+ * reduced-motion media query below neutralize these for motion-sensitive users.
+ * ------------------------------------------------------------------------- */
+
+@keyframes orb-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes orb-spin-reverse {
+  to {
+    transform: rotate(-360deg);
+  }
+}
+@keyframes orb-morph {
+  0%,
+  100% {
+    border-radius: 42% 58% 56% 44% / 48% 42% 58% 52%;
+  }
+  33% {
+    border-radius: 60% 40% 44% 56% / 55% 58% 42% 45%;
+  }
+  66% {
+    border-radius: 48% 52% 60% 40% / 52% 44% 56% 48%;
+  }
+}
+@keyframes orb-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.07);
+  }
+}
+@keyframes ring-out {
+  0% {
+    transform: scale(0.55);
+    opacity: 0.45;
+  }
+  100% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+@keyframes bar-wave {
+  0%,
+  100% {
+    transform: scaleY(0.35);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+
+.animate-orb-pulse {
+  animation: orb-pulse 3.4s ease-in-out infinite;
+}
+.animate-orb-core {
+  animation: orb-morph 7s ease-in-out infinite, orb-spin 14s linear infinite;
+}
+.animate-orb-glow {
+  animation: orb-morph 6s ease-in-out infinite reverse, orb-spin-reverse 11s linear infinite;
+}
+.animate-orb-sheen {
+  animation: orb-morph 5s ease-in-out infinite;
+}
+.animate-ring-out {
+  animation: ring-out 2.8s ease-out infinite;
+}
+.animate-bar-wave {
+  animation: bar-wave 1s ease-in-out infinite;
+  transform-origin: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-orb-pulse,
+  .animate-orb-core,
+  .animate-orb-glow,
+  .animate-orb-sheen,
+  .animate-ring-out,
+  .animate-bar-wave {
+    animation: none;
+  }
 }

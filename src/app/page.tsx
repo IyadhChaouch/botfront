@@ -1,166 +1,238 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { StarIcon } from '@heroicons/react/24/solid';
 
-type LLMResponse = {
-  id: number;
-  model: string;
-  content: string;
-  rating?: number;
-};
+import { Bars3Icon } from '@heroicons/react/24/outline';
 
-type Message = {
-  id: number;
+import { AppHeader } from '@/components/AppHeader';
+import { CardErrorBoundary } from '@/components/CardErrorBoundary';
+import { Composer } from '@/components/Composer';
+import { ConversationSidebar } from '@/components/ConversationSidebar';
+import { DatasetCard, shouldRenderDatasetCard } from '@/components/DatasetCard';
+import { EmptyState } from '@/components/EmptyState';
+import { LogoMark } from '@/components/LogoMark';
+import { MessageBubble } from '@/components/MessageBubble';
+import { ModelResultCard } from '@/components/ModelResultCard';
+import { RouteGuard } from '@/components/auth/RouteGuard';
+import { ChatProvider, useChat, type ChatError } from '@/hooks/useChat';
+import { useT } from '@/lib/preferences';
+import type { MultiModelResponse } from '@/lib/types';
+
+// The assistant home: a conversation-history sidebar (past conversations,
+// search, "Nouvelle conversation", quick access + Urgence card, profile), a
+// centered conversation column, and the redesigned composer (attach, voice,
+// send). Send still flows through the typed API_Client via `useChat`; per-model
+// and dataset cards remain wrapped in per-card error boundaries (R6.2–6.5, 7.3).
+// A microphone in the composer opens the `/voice` mode, which hands a recognized
+// question back here through sessionStorage.
+
+const VOICE_HANDOFF_KEY = 'mgb-voice-pending';
+
+/** Renders the per-model and dataset cards of a received Multi_Model_Response. */
+function ResponseView({
+  response,
+  question,
+}: {
+  response: MultiModelResponse;
   question: string;
-  responses: LLMResponse[];
-};
-
-export default function HomePage() {
-  const [chatHistory, setChatHistory] = useState<Message[]>([]);
-  const [input, setInput] = useState('');
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-
-// pages/index.tsx (or wherever your HomePage lives)
-
-// pages/index.tsx (inside HomePage)
-
-const fetchLLMResponses = async (question: string): Promise<LLMResponse[]> => {
-  const llmEndpoints = [
-
-    { model: 'LLaMA 3',   url: 'http://127.0.0.1:5000/api/llama3',    payloadKey: 'input' },
-  
-  ];
-
-  const responses = await Promise.all(
-    llmEndpoints.map(async ({ model, url, payloadKey }, idx) => {
-      try {
-        const res = await fetch(url, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ [payloadKey]: question }),
-        });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const { response } = await res.json();
-
-        return {
-          id: Date.now() + idx + 1,
-          model,
-          content: response ?? `Empty response from ${model}`,
-        };
-      } catch (err) {
-        return {
-          id: Date.now() + idx + 1,
-          model,
-          content: `⚠️ Failed to fetch from ${model}: ${err}`,
-        };
-      }
-    })
-  );
-
-  return responses;
-};
-
-
-  const sendMessage = async () => {
-    if (!input.trim()) return;
-
-    const userQuestion = input.trim();
-    setInput('');
-
-    const newMessage: Message = {
-      id: Date.now(),
-      question: userQuestion,
-      responses: [],
-    };
-
-    setChatHistory((prev) => [...prev, newMessage]);
-
-    const responses = await fetchLLMResponses(userQuestion);
-
-    setChatHistory((prev) =>
-      prev.map((msg) =>
-        msg.id === newMessage.id
-          ? { ...msg, responses }
-          : msg
-      )
-    );
-  };
-
-  const rateResponse = (messageId: number, responseId: number, rating: number) => {
-    setChatHistory((prev) =>
-      prev.map((msg) =>
-        msg.id === messageId
-          ? {
-              ...msg,
-              responses: msg.responses.map((res) =>
-                res.id === responseId ? { ...res, rating } : res
-              ),
-            }
-          : msg
-      )
-    );
-  };
-
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [chatHistory]);
-
+}) {
   return (
-    <main className="flex flex-col h-screen max-w-5xl mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-6 text-center">ADDINN customer chatbot</h1>
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+      {Object.entries(response.models).map(([modelId, result]) => (
+        <CardErrorBoundary key={modelId} label={result.model || modelId}>
+          <ModelResultCard modelId={modelId} result={result} question={question} />
+        </CardErrorBoundary>
+      ))}
 
-      <div className="flex-1 overflow-y-auto space-y-8">
-        {chatHistory.map((msg) => (
-          <div key={msg.id} className="space-y-3">
-            <div className="text-lg font-semibold bg-blue-50 p-3 rounded-md shadow-sm">
-              🧑‍💻 You asked: <span className="italic">{msg.question}</span>
-            </div>
+      {shouldRenderDatasetCard(response) ? (
+        <CardErrorBoundary label="Dataset Match">
+          <DatasetCard dataset={response.dataset} question={question} />
+        </CardErrorBoundary>
+      ) : null}
+    </div>
+  );
+}
 
-            <div className="grid sm:grid-cols-1 md:grid-cols-2 gap-4">
-              {msg.responses.map((res) => (
-                <div key={res.id} className="bg-white border p-4 rounded-md shadow-sm">
-                  <div className="flex justify-between mb-2">
-                    <span className="text-sm font-medium text-gray-600">{res.model}</span>
-                    <div className="flex space-x-1">
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <StarIcon
-                          key={star}
-                          className={`h-5 w-5 cursor-pointer transition ${
-                            res.rating && res.rating >= star
-                              ? 'text-yellow-400'
-                              : 'text-gray-300'
-                          }`}
-                          onClick={() => rateResponse(msg.id, res.id, star)}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                  <p className="text-gray-800 whitespace-pre-wrap">{res.content}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        ))}
-        <div ref={messagesEndRef} />
-      </div>
-
-      <div className="mt-6 flex gap-2">
-        <input
-          type="text"
-          className="flex-1 border rounded px-4 py-2 shadow-sm"
-          placeholder="Ask something..."
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
-        />
+/**
+ * Renders a send failure for a chat turn (Requirement 7.1, 7.2).
+ */
+function TurnError({
+  error,
+  question,
+  onRetry,
+}: {
+  error: ChatError | null;
+  question: string;
+  onRetry: (question: string) => void;
+}) {
+  if (error === null || error.status === null) {
+    return (
+      <div
+        role="alert"
+        className="flex flex-wrap items-center gap-3 rounded-2xl border border-error bg-surface px-4 py-3 text-sm text-error shadow-sm"
+      >
+        <span>
+          {error?.message
+            ? `Network error: ${error.message}. Please try again.`
+            : 'Network error. Please try again.'}
+        </span>
         <button
-          onClick={sendMessage}
-          className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition"
+          type="button"
+          onClick={() => onRetry(question)}
+          className="rounded-lg border border-error px-3 py-1 text-xs font-semibold transition hover:bg-error/10"
         >
-          Send
+          Retry
         </button>
       </div>
-    </main>
+    );
+  }
+
+  return (
+    <div
+      role="alert"
+      className="rounded-2xl border border-error bg-surface px-4 py-3 text-sm text-error shadow-sm"
+    >
+      Request failed with status {error.status}: {error.message}
+    </div>
+  );
+}
+
+/** The refined assistant "typing" indicator shown while a question is pending. */
+function PendingIndicator() {
+  return (
+    <div className="flex items-start gap-3 animate-message-in">
+      <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand/10 text-brand ring-1 ring-brand/15">
+        <LogoMark className="h-5 w-5" />
+      </span>
+      <div
+        className="flex items-center gap-2 rounded-2xl rounded-tl-md border border-border bg-surface px-4 py-3 shadow-sm"
+        role="status"
+        aria-live="polite"
+      >
+        <span className="inline-block h-2 w-2 animate-pulse rounded-full bg-warning" />
+        <span className="text-sm text-text-muted">Thinking…</span>
+      </div>
+    </div>
+  );
+}
+
+function ChatPage() {
+  const t = useT();
+  const { state, sendMessage, activeTitle } = useChat();
+  const [input, setInput] = useState('');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const handleSend = () => {
+    const question = input.trim();
+    if (!question) return; // empty / whitespace-only input is not submitted
+    setInput('');
+    void sendMessage(question);
+  };
+
+  // Consume a question handed off from the voice mode (see `/voice`).
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const pending = window.sessionStorage.getItem(VOICE_HANDOFF_KEY);
+    if (pending && pending.trim()) {
+      window.sessionStorage.removeItem(VOICE_HANDOFF_KEY);
+      void sendMessage(pending.trim());
+    }
+  }, [sendMessage]);
+
+  // Scroll the most recent message into view whenever the chat history updates
+  // (Requirement 11.3).
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [state.history]);
+
+  return (
+    <div className="flex h-screen flex-col bg-bg text-text">
+      <AppHeader active="assistant" />
+
+      <div className="flex min-h-0 flex-1">
+        <ConversationSidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+
+        {/* Conversation column */}
+        <main className="flex min-w-0 flex-1 flex-col bg-bg">
+          {/* Conversation title bar (+ mobile history toggle) */}
+          <div className="flex h-12 shrink-0 items-center gap-2.5 border-b border-border bg-surface px-4">
+            <button
+              type="button"
+              onClick={() => setSidebarOpen(true)}
+              aria-label={t('chat.openHistory')}
+              className="flex h-9 w-9 items-center justify-center rounded-[9px] border border-border text-text-muted transition hover:text-text lg:hidden"
+            >
+              <Bars3Icon className="h-[18px] w-[18px]" />
+            </button>
+            <div className="truncate text-[14.5px] font-semibold text-text">
+              {activeTitle || t('chat.untitled')}
+            </div>
+          </div>
+
+          <div className="scroll-soft flex-1 overflow-y-auto">
+            <div className="mx-auto w-full max-w-3xl px-4 py-6">
+              {state.history.length === 0 ? (
+                <EmptyState onSelectSuggestion={(question) => void sendMessage(question)} />
+              ) : (
+                <div className="space-y-8">
+                  {state.history.map((turn) => (
+                    <div key={turn.id} className="space-y-4 animate-message-in">
+                      <MessageBubble text={turn.question} />
+
+                      {turn.status === 'pending' ? <PendingIndicator /> : null}
+
+                      {turn.status === 'error' ? (
+                        <div className="flex items-start gap-3">
+                          <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand/10 text-brand ring-1 ring-brand/15">
+                            <LogoMark className="h-5 w-5" />
+                          </span>
+                          <div className="min-w-0 flex-1">
+                            <TurnError
+                              error={turn.error}
+                              question={turn.question}
+                              onRetry={(question) => void sendMessage(question)}
+                            />
+                          </div>
+                        </div>
+                      ) : null}
+
+                      {turn.status === 'success' && turn.response ? (
+                        <div className="flex items-start gap-3">
+                          <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand/10 text-brand ring-1 ring-brand/15">
+                            <LogoMark className="h-5 w-5" />
+                          </span>
+                          <div className="min-w-0 flex-1">
+                            <ResponseView response={turn.response} question={turn.question} />
+                          </div>
+                        </div>
+                      ) : null}
+                    </div>
+                  ))}
+                </div>
+              )}
+              <div ref={messagesEndRef} />
+            </div>
+          </div>
+
+          <Composer
+            input={input}
+            setInput={setInput}
+            onSend={handleSend}
+            pending={state.pending}
+          />
+        </main>
+      </div>
+    </div>
+  );
+}
+
+export default function HomePage() {
+  return (
+    <RouteGuard routeClass="protected">
+      <ChatProvider>
+        <ChatPage />
+      </ChatProvider>
+    </RouteGuard>
   );
 }

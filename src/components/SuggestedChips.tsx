@@ -34,7 +34,7 @@ const SUGGESTIONS: Suggestion[] = [
   },
   {
     label: "Habitation",
-    question: "Comment assurer mon habitation avec Maghrebia ?",
+    question: "Comment assurer mon habitation ?",
     Icon: HomeModernIcon,
   },
   {

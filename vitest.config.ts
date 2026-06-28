@@ -15,6 +15,9 @@ export default defineConfig({
     setupFiles: ["./vitest.setup.ts"],
     include: ["src/**/*.{test,spec}.{ts,tsx}"],
     css: true,
+    // Property-based tests render the full chat page many times per run; give
+    // them headroom beyond the default 5s so they don't flake on slower runs.
+    testTimeout: 30000,
   },
   resolve: {
     // Mirror the "@/*" -> "./src/*" path alias from tsconfig.json.

@@ -28,6 +28,8 @@ import {
   type ReactNode,
 } from "react";
 
+import { BRAND } from "@/lib/brand";
+
 export type ThemeMode = "light" | "dark" | "system";
 export type Locale = "fr" | "ar";
 export type TextSize = "sm" | "base" | "lg" | "xl";
@@ -240,7 +242,7 @@ const FR: Dict = {
   "auth.brand.loginHeadline": "Votre conseiller assurance, à portée de message.",
   "auth.brand.loginSubtitle":
     "Connectez-vous pour retrouver vos conversations, vos devis et le suivi de vos réclamations.",
-  "auth.brand.registerHeadline": "Rejoignez Maghrebia en moins d'une minute.",
+  "auth.brand.registerHeadline": `Rejoignez ${BRAND.name} en moins d'une minute.`,
   "auth.brand.feature.quotes": "Devis auto, santé et habitation",
   "auth.brand.feature.claims": "Suivi de vos réclamations",
   "auth.brand.feature.support": "Assistance 24/7 en un message",
@@ -248,7 +250,7 @@ const FR: Dict = {
   "auth.brand.confidential": "Vos données restent confidentielles",
   // Auth — headings / segmented nav
   "auth.login.welcome": "Bon retour",
-  "auth.login.welcomeSub": "Connectez-vous à votre espace Maghrebia.",
+  "auth.login.welcomeSub": `Connectez-vous à votre espace ${BRAND.shortName}.`,
   "auth.register.subtitle": "Quelques informations pour commencer.",
   "auth.nav.login": "Connexion",
   "auth.nav.register": "Inscription",
@@ -284,7 +286,7 @@ const FR: Dict = {
   "history.last7": "7 DERNIERS JOURS",
   "history.older": "PLUS ANCIEN",
   "chat.disclaimer":
-    "Maghrebia Assistant peut faire des erreurs. Vérifiez les informations importantes.",
+    `${BRAND.name} peut faire des erreurs. Vérifiez les informations importantes.`,
   // Chat — composer
   "chat.attach": "Joindre un fichier",
   "chat.voiceMode": "Mode vocal",
@@ -355,7 +357,7 @@ const AR: Dict = {
   "auth.brand.loginHeadline": "مستشار التأمين الخاص بك، على بُعد رسالة.",
   "auth.brand.loginSubtitle":
     "سجّل الدخول لاستعادة محادثاتك وعروض الأسعار ومتابعة مطالباتك.",
-  "auth.brand.registerHeadline": "انضم إلى مغربية في أقل من دقيقة.",
+  "auth.brand.registerHeadline": `انضم إلى ${BRAND.name} في أقل من دقيقة.`,
   "auth.brand.feature.quotes": "عروض أسعار للسيارات والصحة والمنزل",
   "auth.brand.feature.claims": "متابعة مطالباتك",
   "auth.brand.feature.support": "مساعدة على مدار الساعة برسالة واحدة",
@@ -363,7 +365,7 @@ const AR: Dict = {
   "auth.brand.confidential": "تبقى بياناتك سرية",
   // Auth — headings / segmented nav
   "auth.login.welcome": "مرحبًا بعودتك",
-  "auth.login.welcomeSub": "سجّل الدخول إلى مساحتك في مغربية.",
+  "auth.login.welcomeSub": `سجّل الدخول إلى مساحتك في ${BRAND.shortName}.`,
   "auth.register.subtitle": "بعض المعلومات للبدء.",
   "auth.nav.login": "تسجيل الدخول",
   "auth.nav.register": "إنشاء حساب",
@@ -398,7 +400,7 @@ const AR: Dict = {
   "history.last7": "آخر 7 أيام",
   "history.older": "أقدم",
   "chat.disclaimer":
-    "قد يرتكب مساعد مغربية أخطاء. تحقق من المعلومات المهمة.",
+    `قد يرتكب مساعد ${BRAND.shortName} أخطاء. تحقق من المعلومات المهمة.`,
   // Chat — composer
   "chat.attach": "إرفاق ملف",
   "chat.voiceMode": "الوضع الصوتي",

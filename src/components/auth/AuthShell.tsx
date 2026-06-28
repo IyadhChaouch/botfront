@@ -18,6 +18,7 @@ import {
 } from "@heroicons/react/24/outline";
 
 import { usePreferences, useT } from "@/lib/preferences";
+import { BRAND } from "@/lib/brand";
 
 export type AuthVariant = "login" | "register";
 
@@ -67,7 +68,7 @@ function BrandPanel({ variant }: { variant: AuthVariant }) {
           <ShieldLogo className="h-5 w-5 text-white" />
         </div>
         <div className="flex flex-col leading-none">
-          <span className="text-[16px] font-bold text-white">Maghrebia</span>
+          <span className="text-[16px] font-bold text-white">{BRAND.name}</span>
           <span className="mt-0.5 text-[10px] font-medium tracking-[0.16em] text-white/70">
             {t("brand.subtitle")}
           </span>
@@ -189,7 +190,7 @@ export function AuthShell({
             <div className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-brand text-white">
               <ShieldLogo className="h-5 w-5" />
             </div>
-            <span className="text-[15px] font-bold text-text">Maghrebia</span>
+            <span className="text-[15px] font-bold text-text">{BRAND.name}</span>
           </div>
 
           <div className="flex flex-1 flex-col justify-center px-6 py-8 sm:px-10">

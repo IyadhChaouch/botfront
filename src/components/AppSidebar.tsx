@@ -9,6 +9,7 @@ import Link from "next/link";
 
 import { Cog6ToothIcon, MapPinIcon, PhoneIcon, UserIcon } from "@heroicons/react/24/outline";
 
+import { BRAND } from "@/lib/brand";
 import { useT } from "@/lib/preferences";
 
 export function AppSidebar() {
@@ -44,7 +45,7 @@ export function AppSidebar() {
           {t("urgence.title")}
         </div>
         <div className="mt-1.5 text-[19px] font-bold tracking-wide text-brand" dir="ltr">
-          71 104 540
+          {BRAND.assistanceLine}
         </div>
         <div className="mt-0.5 text-[11.5px] text-text-muted">{t("urgence.subtitle")}</div>
       </div>

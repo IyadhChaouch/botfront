@@ -25,6 +25,7 @@ import {
 
 import { useChat } from "@/hooks/useChat";
 import { useAuth } from "@/lib/auth/context";
+import { BRAND } from "@/lib/brand";
 import { groupConversationsByDate } from "@/lib/chat/conversation-store";
 import { useT } from "@/lib/preferences";
 
@@ -186,7 +187,7 @@ export function ConversationSidebar({ open, onClose }: ConversationSidebarProps)
               {t("urgence.title")}
             </div>
             <div className="mt-1.5 text-[19px] font-bold tracking-wide text-brand" dir="ltr">
-              71 104 540
+              {BRAND.assistanceLine}
             </div>
             <div className="mt-0.5 text-[11.5px] text-text-muted">{t("urgence.subtitle")}</div>
           </div>

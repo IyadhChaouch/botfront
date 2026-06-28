@@ -248,7 +248,7 @@ describe("rating through a rendered card (R8.1, R8.3, R8.4)", () => {
 describe("empty-history guidance (R11.2)", () => {
   it("shows guidance prompting the user to ask a question before any message", () => {
     render(<HomePage />);
-    expect(screen.getByText(/Bienvenue chez Assurances Maghrebia/)).toBeInTheDocument();
+    expect(screen.getByText(/Bienvenue chez AMI Assurances/)).toBeInTheDocument();
     expect(screen.getByText(/Posez-moi une question/)).toBeInTheDocument();
   });
 });

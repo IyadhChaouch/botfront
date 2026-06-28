@@ -9,6 +9,7 @@
 
 import { LogoMark } from "@/components/LogoMark";
 import { SuggestedChips } from "@/components/SuggestedChips";
+import { BRAND } from "@/lib/brand";
 
 export type EmptyStateProps = {
   /** Submits a suggested question (wired to useChat().sendMessage). */
@@ -23,7 +24,7 @@ export function EmptyState({ onSelectSuggestion }: EmptyStateProps) {
       </div>
 
       <h2 className="mt-6 text-2xl font-semibold tracking-tight text-text">
-        Bienvenue chez Assurances Maghrebia
+        Bienvenue chez {BRAND.name}
       </h2>
       <p className="mt-2 max-w-md text-sm leading-relaxed text-text-muted">
         Posez-moi une question sur l&apos;assurance auto, habitation, santé ou

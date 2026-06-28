@@ -22,6 +22,7 @@ import {
 } from "@heroicons/react/24/outline";
 
 import { BrandMark } from "@/components/BrandMark";
+import { BRAND } from "@/lib/brand";
 import { useAuth } from "@/lib/auth/context";
 import { usePreferences, useT } from "@/lib/preferences";
 
@@ -58,7 +59,7 @@ export function AppHeader({ active }: AppHeaderProps) {
       <Link href="/" className="flex items-center gap-2.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand/40 rounded-lg">
         <BrandMark className="h-[34px] w-[34px]" />
         <span className="flex flex-col leading-none">
-          <span className="text-[15.5px] font-bold tracking-tight text-text">Maghrebia</span>
+          <span className="text-[15.5px] font-bold tracking-tight text-text">{BRAND.name}</span>
           <span className="mt-0.5 text-[10px] font-medium tracking-[0.16em] text-text-muted">
             {t("brand.subtitle")}
           </span>

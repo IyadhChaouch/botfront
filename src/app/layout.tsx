@@ -4,6 +4,7 @@ import "./globals.css";
 
 import { AuthProvider } from "@/lib/auth/context";
 import { PreferencesProvider } from "@/lib/preferences";
+import { BRAND } from "@/lib/brand";
 
 const plexSans = IBM_Plex_Sans({
   variable: "--font-plex-sans",
@@ -18,9 +19,8 @@ const plexSansArabic = IBM_Plex_Sans_Arabic({
 });
 
 export const metadata: Metadata = {
-  title: "Assistant Maghrebia | Assurances Maghrebia",
-  description:
-    "Assistant conversationnel d'Assurances Maghrebia : posez vos questions sur les produits et services d'assurance Maghrebia et obtenez des réponses fiables.",
+  title: `Assistant ${BRAND.name} | ${BRAND.name}`,
+  description: `Assistant conversationnel d'${BRAND.name} : posez vos questions sur les produits et services d'assurance et obtenez des réponses fiables.`,
 };
 
 // Applies the persisted theme + locale before first paint so there is no flash

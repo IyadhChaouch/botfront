@@ -365,7 +365,7 @@ function SecurityTab() {
     },
     {
       id: "iphone",
-      device: "iPhone 14 · App Maghrebia",
+      device: "iPhone 14 · App AMI",
       meta: "Tunis, TN · il y a 2 h",
       Icon: DevicePhoneMobileIcon,
     },
